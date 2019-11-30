@@ -69,6 +69,11 @@ func (wc *Wechat) GetAccessToken() (string, error) {
 	return wc.Context.GetAccessToken()
 }
 
+//GetAccessToken 获取access_token
+func (wc *Wechat) GetAccessTokenAndOpenId(code string) (context.ResAccessToken, error) {
+  return wc.Context.GetAccessTokenAndOpenId(code)
+}
+
 // GetOauth oauth2网页授权
 func (wc *Wechat) GetOauth() *oauth.Oauth {
 	return oauth.NewOauth(wc.Context)
