@@ -70,7 +70,7 @@ func (wc *Wechat) GetAccessToken() (string, error) {
 }
 
 //GetAccessToken 获取access_token
-func (wc *Wechat) GetAccessTokenAndOpenId(code string) (context.ResAccessToken, error) {
+func (wc *Wechat) GetAccessTokenAndOpenId(code string) (*context.ResAccessToken, error) {
   return wc.Context.GetAccessTokenAndOpenId(code)
 }
 

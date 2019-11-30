@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	userInfoUnionIDURL = "https://api.weixin.qq.com/sns/userinfo?access_token=%s&openid=%s&lang=zh_CN"
 	userInfoURL     = "https://api.weixin.qq.com/cgi-bin/user/info?access_token=%s&openid=%s&lang=zh_CN"
 	updateRemarkURL = "https://api.weixin.qq.com/cgi-bin/user/info/updateremark?access_token=%s"
 	userListURL     = "https://api.weixin.qq.com/cgi-bin/user/get"
@@ -69,6 +70,32 @@ func (user *User) GetUserInfo(openID string) (userInfo *Info, err error) {
 	}
 
 	uri := fmt.Sprintf(userInfoURL, accessToken, openID)
+	var response []byte
+	response, err = util.HTTPGet(uri)
+	if err != nil {
+		return
+	}
+	userInfo = new(Info)
+	err = json.Unmarshal(response, userInfo)
+	if err != nil {
+		return
+	}
+	if userInfo.ErrCode != 0 {
+		err = fmt.Errorf("GetUserInfo Error , errcode=%d , errmsg=%s", userInfo.ErrCode, userInfo.ErrMsg)
+		return
+	}
+	return
+}
+
+//GetUserInfoByUnionID 获取用户基本信息
+func (user *User) GetUserInfoByUnionID(openID string) (userInfo *Info, err error) {
+	var accessToken string
+	accessToken, err = user.GetAccessToken()
+	if err != nil {
+		return
+	}
+
+	uri := fmt.Sprintf(userInfoUnionIDURL, accessToken, openID)
 	var response []byte
 	response, err = util.HTTPGet(uri)
 	if err != nil {

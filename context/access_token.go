@@ -1,12 +1,11 @@
 package context
 
 import (
-	"encoding/json"
-	"fmt"
-	"sync"
-	"time"
-
-	"github.com/colin3dmax/wechat/util"
+  "encoding/json"
+  "fmt"
+  "github.com/colin3dmax/wechat/util"
+  "sync"
+  "time"
 )
 
 const (
@@ -49,9 +48,10 @@ func (ctx *Context) GetAccessToken() (accessToken string, err error) {
     return ctx.accessTokenFunc(ctx)
   }
   accessTokenCacheKey := fmt.Sprintf("access_token_%s", ctx.AppID)
-  val := ctx.Cache.Get(accessTokenCacheKey)
-  if val != nil {
-    accessToken = val.(string)
+  accessTokenInfo := ctx.Cache.Get(accessTokenCacheKey)
+  if accessTokenInfo != nil {
+    myData := accessTokenInfo.( map[string]interface{} )
+    accessToken = myData["access_token"].(string)
     return
   }
 
@@ -67,26 +67,37 @@ func (ctx *Context) GetAccessToken() (accessToken string, err error) {
 }
 
 //GetAccessToken 获取access_token
-func (ctx *Context) GetAccessTokenAndOpenId(code string) (accessToken ResAccessToken, err error) {
+func (ctx *Context) GetAccessTokenAndOpenId(code string) (accessToken *ResAccessToken, err error) {
   ctx.accessTokenLock.Lock()
   defer ctx.accessTokenLock.Unlock()
 
-  accessTokenCacheKey := fmt.Sprintf("access_token_openid_%s", ctx.AppID)
-  val := ctx.Cache.Get(accessTokenCacheKey)
-  if val != nil {
-    accessToken = val.(ResAccessToken)
-    return
-  }
+  //accessTokenCacheKey := fmt.Sprintf("access_token_openid_%s_%s", ctx.AppID)
+  //accessTokenInfo := ctx.Cache.Get(accessTokenCacheKey)
+  //if accessTokenInfo != nil {
+  //  myData := accessTokenInfo.( map[string]interface{} )
+  //
+  //  fmt.Println(myData)
+  //
+  //  var result ResAccessToken
+  //  result.OpenID = myData["openid"].(string)
+  //  result.UnionId = myData["unionid"].(string)
+  //  result.Scope = myData["scope"].(string)
+  //  result.RefreshToken = myData["refresh_token"].(string)
+  //  result.ExpiresIn = int64(myData["expires_in"].(float64))
+  //  result.AccessToken = myData["access_token"].(string)
+  //  result.ErrCode =  int64(myData["errcode"].(float64))
+  //  result.ErrMsg = myData["errmsg"].(string)
+  //  return &result,nil
+  //}
 
   //从微信服务器获取
-  var resAccessToken ResAccessToken
-  resAccessToken, err = ctx.GetAccessTokenAndOpenIdFromServer(code)
+  resAccessToken, err := ctx.GetAccessTokenAndOpenIdFromServer(code)
   if err != nil {
-    return
+    return nil,err
   }
 
   accessToken = resAccessToken
-  return
+  return accessToken,nil
 }
 
 //GetAccessTokenFromServer 强制从微信服务器获取token
@@ -114,24 +125,52 @@ func (ctx *Context) GetAccessTokenFromServer() (resAccessToken ResAccessToken, e
 
 
 //GetAccessTokenFromServer 强制从微信服务器获取token
-func (ctx *Context) GetAccessTokenAndOpenIdFromServer(code string) (resAccessToken ResAccessToken, err error) {
+func (ctx *Context) GetAccessTokenAndOpenIdFromServer(code string) (resAccessToken *ResAccessToken, err error) {
   url := fmt.Sprintf("%s?appid=%s&secret=%s&code=%s&grant_type=authorization_code", AccessTokenURL2, ctx.AppID, ctx.AppSecret,code)
   var body []byte
   body, err = util.HTTPGet(url)
   if err != nil {
-    return
-  }
-  err = json.Unmarshal(body, &resAccessToken)
-  if err != nil {
-    return
-  }
-  if resAccessToken.ErrMsg != "" {
-    err = fmt.Errorf("get access_token error : errcode=%v , errormsg=%v", resAccessToken.ErrCode, resAccessToken.ErrMsg)
-    return
+    return nil,err
   }
 
-  accessTokenCacheKey := fmt.Sprintf("access_token_openid_%s", ctx.AppID)
-  expires := resAccessToken.ExpiresIn - 1500
-  err = ctx.Cache.Set(accessTokenCacheKey, resAccessToken, time.Duration(expires)*time.Second)
-  return
+  var accessToken ResAccessToken
+  err = json.Unmarshal(body, &accessToken)
+  if err != nil {
+    return nil,err
+  }
+  if accessToken.ErrMsg != "" {
+    err = fmt.Errorf("get access_token error : errcode=%v , errormsg=%v", accessToken.ErrCode, accessToken.ErrMsg)
+    return nil,err
+  }
+
+  accessTokenCacheKey := fmt.Sprintf("access_token_%s", ctx.AppID)
+  expires := accessToken.ExpiresIn - 1500
+
+  err = ctx.Cache.Set(accessTokenCacheKey, &accessToken, time.Duration(expires)*time.Second)
+  if err != nil {
+    return nil,err
+  }
+  resAccessToken = &accessToken
+  return resAccessToken,nil
 }
+
+
+func (ctx *Context) encodeJSON(data interface{})(string,error){
+  result, err := json.Marshal(&data)
+  if err != nil {
+    return "",err
+  }
+  return string(result),nil
+}
+
+
+func (ctx *Context) decodeJSON(data string,result interface{})(interface{},error){
+  b := []byte(data)
+  err := json.Unmarshal(b,result)
+  if err != nil {
+    return nil,err
+  }
+  return result,nil
+}
+
+
