@@ -107,7 +107,7 @@ func (wxa *MiniProgram) MsgSecCheck(msg string) (result ResImgSecCheck, err erro
     return
   }
   if result.ErrCode != 0 {
-    err = fmt.Errorf("ImgSecCheck error : errcode=%v , errmsg=%v", result.ErrCode, result.ErrMsg)
+    err = fmt.Errorf("MsgSecCheck error : errcode=%v , errmsg=%v", result.ErrCode, result.ErrMsg)
     return
   }
   return
