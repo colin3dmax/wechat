@@ -23,7 +23,7 @@ func (wxa *MiniProgram) postMultipartForm(urlStr string, fields []util.Multipart
 const (
   // 访问页面
   imgSecCheckURL = "https://api.weixin.qq.com/wxa/img_sec_check?access_token=%s"
-  msgSecCheck = "https://api.weixin.qq.com/wxa/img_sec_check?access_token=%s"
+  msgSecCheck = "https://api.weixin.qq.com/wxa/msg_sec_check?access_token=%s"
 )
 
 type FileInfo struct {
