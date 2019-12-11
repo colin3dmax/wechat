@@ -50,8 +50,7 @@ func (ctx *Context) GetAccessToken() (accessToken string, err error) {
   accessTokenCacheKey := fmt.Sprintf("access_token_%s", ctx.AppID)
   accessTokenInfo := ctx.Cache.Get(accessTokenCacheKey)
   if accessTokenInfo != nil {
-    myData := accessTokenInfo.( map[string]interface{} )
-    accessToken = myData["access_token"].(string)
+    accessToken = accessTokenInfo.(string)
     return
   }
 
