@@ -6,6 +6,7 @@ import (
   "github.com/colin3dmax/wechat/util"
   "io/ioutil"
   "net/http"
+  "time"
 )
 
 func (wxa *MiniProgram) postMultipartForm(urlStr string, fields []util.MultipartFormField) (response []byte, err error) {
@@ -38,7 +39,7 @@ func (wxa *MiniProgram) downloadFile(uri string) (*FileInfo, error) {
   }
 
   fileInfo := FileInfo{
-    //FileName: uri[strings.LastIndex(uri,"/")+1:],
+    FileName: string(time.Now().UnixNano()),
     FileType: "",
     Data:     nil,
   }
