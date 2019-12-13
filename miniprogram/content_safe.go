@@ -6,6 +6,7 @@ import (
   "github.com/colin3dmax/wechat/util"
   "io/ioutil"
   "net/http"
+  "strconv"
   "time"
 )
 
@@ -39,7 +40,7 @@ func (wxa *MiniProgram) downloadFile(uri string) (*FileInfo, error) {
   }
 
   fileInfo := FileInfo{
-    FileName: string(time.Now().UnixNano()),
+    FileName: strconv.FormatInt(time.Now().UnixNano(),10),
     FileType: "",
     Data:     nil,
   }
