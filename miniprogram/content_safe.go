@@ -71,7 +71,7 @@ func (wxa *MiniProgram) ImgSecCheck(imgUrl string) (result ResImgSecCheck, err e
   }
   forms := []util.MultipartFormField{
     {
-      IsFile:    true,
+      IsFile:    false,
       Fieldname: "media",
       Value:    fileInfo.Data,
       Filename:  fileInfo.FileName,
