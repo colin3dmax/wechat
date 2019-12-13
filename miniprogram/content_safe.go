@@ -17,7 +17,7 @@ func (wxa *MiniProgram) postMultipartForm(urlStr string, fields []util.Multipart
     return
   }
   urlStr = fmt.Sprintf(urlStr, accessToken)
-  response, err = util.PostMultipartForm(fields,urlStr)
+  response, err = util.PostMedia(fields,urlStr)
   return response,err
 }
 
